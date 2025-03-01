@@ -1,4 +1,5 @@
 📊Student Result Management System
+
 A comprehensive system for managing and analyzing student results using Python, PySpark, and Streamlit. This project handles data for 10,000 students across 6 subjects, providing detailed analytics and an interactive dashboard.
 
 Dashboard Overview
