@@ -1,0 +1,37 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg, min, max
+import pandas as pd
+import matplotlib.pyplot as plt
+import random
+spark = SparkSession.builder.appName("ResultManagementSystem").getOrCreate()
+subjects = ["Electronics", "Programming", "Database", "Data Science", "Mathematics", "DSA"]
+data = {
+    "Student_ID": [i for i in range(1, 10001)],
+    "Name": [f"Student_{i}" for i in range(1, 10001)],
+}
+for subject in subjects:
+    data[subject] = [random.randint(35, 100) for _ in range(10000)]
+
+df = pd.DataFrame(data)
+df.to_csv("student_results.csv", index=False)
+
+student_df = spark.read.csv("student_results.csv", header=True, inferSchema=True)
+
+student_df.show(5)
+stats_df = student_df.select(
+    *[avg(col(subj)).alias(f"Avg_{subj}") for subj in subjects],
+    *[min(col(subj)).alias(f"Min_{subj}") for subj in subjects],
+    *[max(col(subj)).alias(f"Max_{subj}") for subj in subjects]
+)
+
+stats_pd = stats_df.toPandas().T
+
+stats_pd.plot(kind="bar", figsize=(10, 5))
+plt.title("Subject-Wise Statistics")
+plt.xlabel("Subjects")
+plt.ylabel("Marks")
+plt.legend(["Average", "Min", "Max"])
+plt.show()
+
+
+student_df.write.csv("processed_results.csv", header=True)
